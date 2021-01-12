@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>org.maja-nord</groupId>
+        <version>develop-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>client</artifactId>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Clean the node install dir, node_modules and the report files -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${version.maven.clean.plugin}</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>../node</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>.</directory>
+                            <includes>
+                                <include>eslint.xml</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>coverage</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <!-- Collect Surefire reports -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${version.surefire.plugin}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${version.maven.deploy.plugin}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Install Node.js and NPM -->
+        <profile>
+            <id>install-node-and-npm</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${version.maven.frontend.plugin}</version>
+                        <configuration>
+                            <installDirectory>../node</installDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>install node and npm</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <phase>initialize</phase>
+                                <configuration>
+                                    <nodeVersion>${version.node.js}</nodeVersion>
+                                    <nodeDownloadRoot>${node.download.root}</nodeDownloadRoot>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Install NPM dependencies -->
+        <profile>
+            <id>install-npm-dependencies</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${version.maven.frontend.plugin}</version>
+                        <configuration>
+                            <installDirectory>../node</installDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>npm install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Lint the source code -->
+        <!--<profile>
+          <id>lint</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${version.maven.frontend.plugin}</version>
+                <configuration>
+                  <installDirectory>../node</installDirectory>
+                </configuration>
+                <executions>
+                  <execution>
+                    <id>npm lint-ci</id>
+                    <goals>
+                      <goal>npm</goal>
+                    </goals>
+                    <phase>process-sources</phase>
+                    <configuration>
+                      <arguments>run lint-ci</arguments>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>npm retire-ci</id>
+                    <goals>
+                      <goal>npm</goal>
+                    </goals>
+                    <phase>process-sources</phase>
+                    <configuration>
+                      <arguments>run retire-ci</arguments>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </profile>-->
+
+        <!-- Transpile and package the client -->
+        <profile>
+            <id>build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${version.maven.frontend.plugin}</version>
+                        <configuration>
+                            <installDirectory>../node</installDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>npm build</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>${version.maven.war.plugin}</version>
+                        <configuration>
+                            <failOnMissingWebXml>false</failOnMissingWebXml>
+                            <webResources>
+                                <resource>
+                                    <directory>build/</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Run unit tests -->
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${version.maven.frontend.plugin}</version>
+                        <configuration>
+                            <installDirectory>../node</installDirectory>
+                        </configuration>
+                        <executions>
+                            <!-- Run unit tests -->
+                            <execution>
+                                <id>npm test</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <arguments>run test-ci</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

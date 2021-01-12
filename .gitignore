@@ -1,0 +1,9 @@
+.idea
+*.iml
+.flattened-pom.xml
+client/build
+client/node_modules
+node
+server/target
+client/target
+docker/*.jar
